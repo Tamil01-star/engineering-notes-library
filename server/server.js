@@ -53,6 +53,22 @@ app.use('/api/subjects', require('./routes/subjects'));
 app.use('/api/notes', require('./routes/notes'));
 app.use('/api/admin', require('./routes/admin'));
 
+// Serve React static frontend in production
+const clientBuildPath = path.join(__dirname, '..', 'client', 'dist');
+app.use(express.static(clientBuildPath));
+
+// Catch-all route to serve index.html for React Router DOM
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+    return next();
+  }
+  res.sendFile(path.join(clientBuildPath, 'index.html'), (err) => {
+    if (err) {
+      res.status(200).send('Academic Server is running. Frontend static build files not found. Run npm run build inside client/ folder first.');
+    }
+  });
+});
+
 app.use((err, req, res, next) => {
   console.error('🚨 Express Error:', err.message);
   res.status(err.status || 500).json({
