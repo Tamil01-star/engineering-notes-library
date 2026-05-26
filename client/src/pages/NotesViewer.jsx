@@ -4,7 +4,173 @@ import { useAuth } from '../context/AuthContext';
 import { 
   ArrowLeft, Download, Trash2, Bookmark, Star, Layers, 
   MessageSquare, Send, BookOpen, Eye, Info
-} from 'lucide-react';
+} from 'lucide-react';const getFileExtension = (url, title) => {
+  if (url && url.startsWith('data:')) {
+    const mime = url.substring(url.indexOf(':') + 1, url.indexOf(';'));
+    if (mime.includes('pdf')) return 'pdf';
+    if (mime.includes('word') || mime.includes('officedocument.wordprocessing')) return 'docx';
+    if (mime.includes('presentation') || mime.includes('officedocument.presentation')) return 'pptx';
+    if (mime.includes('image')) return 'image';
+  }
+  const cleanUrl = url ? url.split('?')[0].split('#')[0] : '';
+  const ext = cleanUrl.substring(cleanUrl.lastIndexOf('.') + 1).toLowerCase();
+  if (['pdf', 'docx', 'doc', 'pptx', 'ppt', 'jpg', 'jpeg', 'png'].includes(ext)) {
+    return ext;
+  }
+  if (title) {
+    const titleExt = title.substring(title.lastIndexOf('.') + 1).toLowerCase();
+    if (['pdf', 'docx', 'doc', 'pptx', 'ppt', 'jpg', 'jpeg', 'png'].includes(titleExt)) {
+      return titleExt;
+    }
+  }
+  return 'pdf'; // fallback
+};
+
+const WordPreview = ({ url }) => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const containerRef = React.useRef(null);
+
+  useEffect(() => {
+    let active = true;
+    const renderDoc = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const loadScript = (src) => new Promise((resolve, reject) => {
+          if (window.docx) { resolve(); return; }
+          if (document.querySelector(`script[src="${src}"]`)) {
+            const interval = setInterval(() => {
+              if (window.docx) {
+                clearInterval(interval);
+                resolve();
+              }
+            }, 50);
+            return;
+          }
+          const script = document.createElement('script');
+          script.src = src;
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+
+        await loadScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+        await loadScript('https://cdn.jsdelivr.net/npm/docx-preview@0.1.20/dist/docx-preview.min.js');
+
+        if (!active) return;
+        
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Failed to load file content');
+        const blob = await res.blob();
+        
+        if (!active) return;
+        if (containerRef.current) {
+          containerRef.current.innerHTML = '';
+          await window.docx.renderAsync(blob, containerRef.current, null, {
+            className: "docx-document",
+            inWrapper: false
+          });
+        }
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        if (active) {
+          setError('Could not render Word document preview. Download the file to view.');
+          setLoading(false);
+        }
+      }
+    };
+
+    renderDoc();
+    return () => { active = false; };
+  }, [url]);
+
+  return (
+    <div className="w-full bg-slate-900 rounded-xl p-2 md:p-4 min-h-[600px] flex flex-col">
+      {loading && (
+        <div className="flex-grow flex flex-col items-center justify-center space-y-3 py-16">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-cyan-500 border-t-transparent"></div>
+          <p className="text-xs text-slate-400 font-mono">Rendering Word pages...</p>
+        </div>
+      )}
+      {error && (
+        <div className="flex-grow flex flex-col items-center justify-center text-center p-6 space-y-4 py-16">
+          <p className="text-sm text-rose-400 font-medium">{error}</p>
+        </div>
+      )}
+      <div 
+        ref={containerRef} 
+        className="flex-grow overflow-auto max-h-[600px] bg-white text-black p-4 md:p-8 rounded-lg docx-preview-container"
+        style={{ display: loading || error ? 'none' : 'block' }}
+      />
+    </div>
+  );
+};
+
+const PptxPreview = ({ url }) => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const containerRef = React.useRef(null);
+
+  useEffect(() => {
+    let active = true;
+    const renderPpt = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Failed to load presentation file');
+        const blob = await res.blob();
+        
+        if (!active) return;
+
+        const module = await import('https://cdn.jsdelivr.net/npm/pptx-viewer/+esm');
+        
+        if (!active) return;
+        
+        if (containerRef.current) {
+          containerRef.current.innerHTML = '';
+          const viewer = new module.PPTXViewer(containerRef.current);
+          await viewer.load(blob);
+        }
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        if (active) {
+          setError('Could not render slides preview. Download the file to view.');
+          setLoading(false);
+        }
+      }
+    };
+
+    renderPpt();
+    return () => { active = false; };
+  }, [url]);
+
+  return (
+    <div className="w-full bg-slate-900 rounded-xl p-2 md:p-4 min-h-[600px] flex flex-col">
+      {loading && (
+        <div className="flex-grow flex flex-col items-center justify-center space-y-3 py-16">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-cyan-500 border-t-transparent"></div>
+          <p className="text-xs text-slate-400 font-mono">Rendering presentation slides...</p>
+        </div>
+      )}
+      {error && (
+        <div className="flex-grow flex flex-col items-center justify-center text-center p-6 space-y-4 py-16">
+          <p className="text-sm text-rose-400 font-medium">{error}</p>
+        </div>
+      )}
+      <div 
+        ref={containerRef} 
+        className="flex-grow overflow-auto max-h-[600px] bg-slate-950 p-4 rounded-lg pptx-preview-container"
+        style={{ display: loading || error ? 'none' : 'block' }}
+      />
+    </div>
+  );
+};
 
 const NotesViewer = () => {
   const { id } = useParams();
@@ -312,16 +478,36 @@ const NotesViewer = () => {
             {/* Document View Area */}
             <div className="flex-1 bg-slate-950 min-h-[500px] flex items-center justify-center p-1 sm:p-4">
               {!readingMode ? (
-                // PDF / Image native iframe preview
-                <div className="w-full h-full min-h-[600px] relative rounded-xl overflow-hidden bg-slate-950">
-                  <iframe 
-                    src={(() => {
-                      const isAbsolute = note.fileUrl.startsWith('http') || note.fileUrl.startsWith('data:') || note.fileUrl.startsWith('blob:');
-                      return isAbsolute ? note.fileUrl : (import.meta.env.VITE_API_URL || '') + note.fileUrl;
-                    })()} 
-                    className="w-full h-[600px] border-none bg-slate-900 rounded-xl"
-                    title={note.title}
-                  />
+                <div className="w-full h-full min-h-[600px] relative rounded-xl overflow-hidden bg-slate-950 flex items-center justify-center">
+                  {(() => {
+                    const isAbsolute = note.fileUrl.startsWith('http') || note.fileUrl.startsWith('data:') || note.fileUrl.startsWith('blob:');
+                    const resolvedFileUrl = isAbsolute ? note.fileUrl : (import.meta.env.VITE_API_URL || '') + note.fileUrl;
+                    const ext = getFileExtension(resolvedFileUrl, note.title);
+
+                    if (ext === 'docx' || ext === 'doc') {
+                      return <WordPreview url={resolvedFileUrl} />;
+                    } else if (ext === 'pptx' || ext === 'ppt') {
+                      return <PptxPreview url={resolvedFileUrl} />;
+                    } else if (['jpg', 'jpeg', 'png'].includes(ext)) {
+                      return (
+                        <div className="w-full min-h-[500px] flex items-center justify-center p-4 bg-slate-900 rounded-xl overflow-auto">
+                          <img 
+                            src={resolvedFileUrl} 
+                            alt={note.title} 
+                            className="max-w-full max-h-[600px] object-contain rounded-lg shadow-lg border border-white/5" 
+                          />
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <iframe 
+                          src={resolvedFileUrl} 
+                          className="w-full h-[600px] border-none bg-slate-900 rounded-xl"
+                          title={note.title}
+                        />
+                      );
+                    }
+                  })()}
                 </div>
               ) : (
                 // Notebook overview texture mode
