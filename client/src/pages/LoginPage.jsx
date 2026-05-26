@@ -155,7 +155,7 @@ const LoginPage = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(prev => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-400 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-cyan-400 transition-colors z-10 flex items-center justify-center"
                 tabIndex={-1}
                 title={showPassword ? 'Hide password' : 'Show password'}
               >

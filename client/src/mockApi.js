@@ -186,15 +186,14 @@ const R = (data, status = 200) =>
 const originalFetch = window.fetch;
 
 window.fetch = async (input, init) => {
-  let urlStr = typeof input === 'string' ? input : (input instanceof Request ? input.url : '');
-
-  // Resolve base URL if using VITE_API_URL prefix
-  if (urlStr.startsWith('/') && !urlStr.startsWith('//')) {
-    // keep as-is
-  } else {
-    const baseUrl = import.meta.env.VITE_API_URL || '';
-    if (baseUrl && urlStr.startsWith(baseUrl)) urlStr = urlStr.substring(baseUrl.length);
-  }
+  let rawUrl = typeof input === 'string' ? input : (input instanceof Request ? input.url : '');
+  
+  // Normalize to pathname to support absolute URLs (e.g. from Vercel/production fetches)
+  let urlStr = rawUrl;
+  try {
+    const parsed = new URL(rawUrl, window.location.origin);
+    urlStr = parsed.pathname;
+  } catch (e) {}
 
   if (!urlStr.startsWith('/api')) return originalFetch(input, init);
 
