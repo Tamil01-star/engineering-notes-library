@@ -60,7 +60,11 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Academic server running on port http://localhost:${PORT}`);
-  console.log(`📂 Uploads directory served at http://localhost:${PORT}/uploads/`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Academic server running on port http://localhost:${PORT}`);
+    console.log(`📂 Uploads directory served at http://localhost:${PORT}/uploads/`);
+  });
+}
+
+module.exports = app;
