@@ -440,11 +440,27 @@ window.fetch = async (input, init) => {
           }
         }
 
-        const { notes } = getDb();
+        const { notes, subjects } = getDb();
+        const cleanSubject = subject.trim();
+        
+        // Auto-create subject card if it doesn't exist for this semester
+        const subjectExists = subjects.some(s => s.semester === semester && s.subjectName.toLowerCase() === cleanSubject.toLowerCase());
+        if (!subjectExists) {
+          const cleanCode = cleanSubject.substring(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, '') || 'SUB';
+          const newSubject = {
+            id: 'sub-' + Date.now(),
+            semester: semester,
+            subjectName: cleanSubject,
+            subjectCode: `${cleanCode}-${Math.floor(100 + Math.random() * 900)}`,
+            professorName: 'Department Panel'
+          };
+          subjects.push(newSubject);
+        }
+
         const newNote = {
           id: 'note-' + Date.now(),
           title,
-          subject,
+          subject: cleanSubject,
           semester,
           unitNumber,
           description,
@@ -463,7 +479,7 @@ window.fetch = async (input, init) => {
         };
 
         notes.push(newNote);
-        saveDb({ notes });
+        saveDb({ notes, subjects });
 
         return mockResponse(newNote, 201);
       }

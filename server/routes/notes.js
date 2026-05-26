@@ -59,14 +59,32 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
   try {
     const isFallback = dbConfig.isFallback();
 
+    const cleanSubject = subject.trim();
+
     if (isFallback) {
+      // Auto-create subject card if it doesn't exist for this semester in db_subjects.json
+      const subjects = mockDb.getSubjects();
+      const subjectExists = subjects.some(s => s.semester === Number(semester) && s.subjectName.toLowerCase() === cleanSubject.toLowerCase());
+      if (!subjectExists) {
+        const cleanCode = cleanSubject.substring(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, '') || 'SUB';
+        const newSubject = {
+          id: 'sub-' + Date.now(),
+          semester: Number(semester),
+          subjectName: cleanSubject,
+          subjectCode: `${cleanCode}-${Math.floor(100 + Math.random() * 900)}`,
+          professorName: 'Department Panel'
+        };
+        subjects.push(newSubject);
+        mockDb.saveSubjects(subjects);
+      }
+
       const users = mockDb.getUsers();
       const userIndex = users.findIndex(u => u.id === req.user.id);
       
       const newNote = {
         id: 'note-' + Date.now(),
         title,
-        subject,
+        subject: cleanSubject,
         semester: Number(semester),
         unitNumber: Number(unitNumber),
         description: description || '',
@@ -97,9 +115,22 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
 
       return res.status(201).json(newNote);
     } else {
+      // Check MongoDB Subject collection
+      const Subject = require('../models/Subject');
+      const subjectExists = await Subject.findOne({ semester: Number(semester), subjectName: { $regex: new RegExp('^' + cleanSubject + '$', 'i') } });
+      if (!subjectExists) {
+        const cleanCode = cleanSubject.substring(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, '') || 'SUB';
+        await Subject.create({
+          semester: Number(semester),
+          subjectName: cleanSubject,
+          subjectCode: `${cleanCode}-${Math.floor(100 + Math.random() * 900)}`,
+          professorName: 'Department Panel'
+        });
+      }
+
       const note = await Note.create({
         title,
-        subject,
+        subject: cleanSubject,
         semester: Number(semester),
         unitNumber: Number(unitNumber),
         description: description || '',

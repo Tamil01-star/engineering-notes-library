@@ -223,6 +223,27 @@ const ProfilePage = () => {
                     Sign Out
                   </button>
                 </div>
+
+                {/* Uploads by Course Summary */}
+                {profile?.uploadedNotes && profile.uploadedNotes.length > 0 && (
+                  <div className="p-4 rounded-xl bg-slate-800/40 border border-white/5 space-y-3 pt-4 border-t border-white/5">
+                    <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider font-mono">Uploads by Course</span>
+                    <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
+                      {(() => {
+                        const counts = {};
+                        profile.uploadedNotes.forEach(n => {
+                          counts[n.subject] = (counts[n.subject] || 0) + 1;
+                        });
+                        return Object.entries(counts).map(([courseName, count], idx) => (
+                          <div key={idx} className="flex justify-between items-center text-[11px] border-b border-white/5 pb-2 last:border-0 last:pb-0 font-sans">
+                            <span className="text-slate-300 truncate pr-2 font-medium" title={courseName}>{courseName}</span>
+                            <span className="font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-bold flex-shrink-0 text-[10px]">{count} {count === 1 ? 'file' : 'files'}</span>
+                          </div>
+                        ));
+                      })()}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
