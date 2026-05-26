@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, Mail, Lock, User, AlertCircle, ArrowRight } from 'lucide-react';
+import { BookOpen, Mail, Lock, User, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
+
 
 const LoginPage = () => {
   const { login, register, loginWithGoogle, error } = useAuth();
@@ -18,6 +19,7 @@ const LoginPage = () => {
 
   const [formError, setFormError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const redirectPath = searchParams.get('redirect') || '/semesters';
 
@@ -27,8 +29,8 @@ const LoginPage = () => {
     setLoading(true);
 
     const emailLower = email.toLowerCase().trim();
-    if (!emailLower.endsWith('@gmail.com') && !emailLower.endsWith('@googlemail.com') && !emailLower.endsWith('@google.com')) {
-      setFormError('Only Google Mail IDs (@gmail.com) are authorized for access.');
+    if (!emailLower.includes('@') || !emailLower.includes('.')) {
+      setFormError('Please enter a valid email address.');
       setLoading(false);
       return;
     }
@@ -139,16 +141,27 @@ const LoginPage = () => {
 
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-              <Lock className="h-3.5 w-3.5" /> Secure Password
+              <Lock className="h-3.5 w-3.5" /> Password
             </label>
-            <input
-              type="password"
-              placeholder="Enter secure password..."
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full rounded-xl bg-slate-800 border border-white/10 px-4 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter your password..."
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full rounded-xl bg-slate-800 border border-white/10 px-4 py-2 pr-10 text-xs text-white focus:outline-none focus:border-cyan-400"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(prev => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-400 transition-colors"
+                tabIndex={-1}
+                title={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
 
           {!isLoginTab && (
