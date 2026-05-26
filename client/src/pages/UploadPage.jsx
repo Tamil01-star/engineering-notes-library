@@ -8,6 +8,59 @@ import {
 
 const ALLOWED_EXTS = ['.pdf', '.docx', '.ppt', '.pptx', '.jpg', '.jpeg', '.png'];
 
+const compressImage = (file) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const MAX_WIDTH = 1600;
+        const MAX_HEIGHT = 1600;
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          'image/jpeg',
+          0.7
+        );
+      };
+    };
+    reader.onerror = () => resolve(file);
+  });
+};
+
 const UploadPage = () => {
   const { user, token } = useAuth();
   const navigate = useNavigate();
@@ -121,17 +174,23 @@ const UploadPage = () => {
     setSuccessCount(0);
 
     let successfulUploads = 0;
+    let completedCount = 0;
 
-    for (let i = 0; i < validFiles.length; i++) {
-      setCurrentFileIdx(i);
-      setProgress(Math.round((i / validFiles.length) * 90));
-
-      const { file, name } = validFiles[i];
+    const uploadPromises = validFiles.map(async (fileObj) => {
+      let { file, name } = fileObj;
       const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+      // Compress image notes on-the-fly (dramatically reduces size and speeds up upload)
+      if (['.jpg', '.jpeg', '.png'].includes(ext)) {
+        try {
+          file = await compressImage(file);
+        } catch (compressErr) {
+          console.warn('[Upload] Image compression failed, uploading original:', compressErr);
+        }
+      }
 
       const formData = new FormData();
       formData.append('file', file);
-      // Title = name; topicGroup used for folder grouping in SemesterDetail
       formData.append('title', name || file.name.replace(/\.[^/.]+$/, ''));
       formData.append('topicGroup', topicName.trim());
       formData.append('subject', subject);
@@ -149,9 +208,15 @@ const UploadPage = () => {
         });
         if (res.ok) successfulUploads++;
       } catch (err) {
-        // individual file failure — continue with others
+        // individual file failure — continue
+      } finally {
+        completedCount++;
+        setProgress(Math.round((completedCount / validFiles.length) * 90));
+        setCurrentFileIdx(Math.min(completedCount, validFiles.length - 1));
       }
-    }
+    });
+
+    await Promise.all(uploadPromises);
 
     setProgress(100);
     setSuccessCount(successfulUploads);
