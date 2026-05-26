@@ -7,130 +7,33 @@ const PROF_NAMES = [
   'Prof. Rachel Carson', 'Dr. Grace Hopper', 'Dr. Edgar Codd', 'Prof. Linus Torvalds'
 ];
 
-// Initialize default subjects
+
+// All subjects start empty — users create their own course names
 const defaultSubjects = [];
-for (let sem = 1; sem <= 8; sem++) {
-  for (let c = 1; c <= 10; c++) {
-    defaultSubjects.push({
-      id: `sub-s${sem}-${c}`,
-      semester: sem,
-      subjectName: `Semester ${sem} Course ${c}`,
-      subjectCode: `SEM${sem}-C${c}`,
-      professorName: PROF_NAMES[(sem + c) % PROF_NAMES.length]
-    });
-  }
+
+// Initialize default notes — empty, users create their own
+const defaultNotes = [];
+
+// ── One-time Migration: wipe legacy pre-seeded course data ───────────────────
+// If localStorage still has the old 80-entry auto-generated subjects, clear them.
+const DB_VERSION = '3';
+if (localStorage.getItem('notes_db_version') !== DB_VERSION) {
+  try {
+    const storedSubs = JSON.parse(localStorage.getItem('notes_subjects') || '[]');
+    // Legacy data had subjects named "Semester N Course N" or GATE/TNPSC default
+    const hasLegacy = storedSubs.some(s => /^Semester \d+ Course \d+$/.test(s.subjectName) || s.id?.startsWith('sub-s'));
+    if (hasLegacy) {
+      localStorage.removeItem('notes_subjects');
+      localStorage.removeItem('notes_notes');
+      console.info('[MockDB] Cleared legacy seeded data. Fresh start!');
+    }
+  } catch (e) {}
+  localStorage.setItem('notes_db_version', DB_VERSION);
 }
+// ────────────────────────────────────────────────────────────────────────────
 
-const govtExamsList = [
-  { name: 'GATE (Graduate Aptitude Test in Engineering)', code: 'GATE' },
-  { name: 'TNPSC (Tamil Nadu Public Service Commission)', code: 'TNPSC' },
-  { name: 'UPSC (Union Public Service Commission)', code: 'UPSC' },
-  { name: 'SSC CGL (Staff Selection Commission)', code: 'SSC-CGL' },
-  { name: 'RRB JE (Railway Recruitment Board)', code: 'RRB-JE' },
-  { name: 'ISRO Scientist Exam', code: 'ISRO-SC' },
-  { name: 'BARC OCES/DGFS', code: 'BARC' },
-  { name: 'DRDO Scientist Entry Test', code: 'DRDO-SET' },
-  { name: 'ESE/IES (Engineering Services Exam)', code: 'ESE-IES' },
-  { name: 'PSU Recruitment Exams', code: 'PSU-EXAM' }
-];
 
-govtExamsList.forEach((exam, idx) => {
-  defaultSubjects.push({
-    id: `sub-s9-${idx + 1}`,
-    semester: 9,
-    subjectName: exam.name,
-    subjectCode: exam.code,
-    professorName: 'Government Exam Board'
-  });
-});
 
-// Initialize default notes
-const defaultNotes = [
-  {
-    id: 'note-1',
-    title: 'Introduction to Course 1 Concepts',
-    subject: 'Semester 1 Course 1',
-    semester: 1,
-    unitNumber: 1,
-    description: 'Lecture overview summaries for Course 1, including baseline definitions and syllabus references.',
-    fileUrl: 'https://arxiv.org/pdf/2103.00020.pdf',
-    uploadedBy: { name: 'Dr. Evelyn Carter', email: 'carter@university.edu', userId: 'user-default' },
-    uploadDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    tags: ['Intro', 'Core', 'Course1'],
-    downloads: 12,
-    rating: 4.8,
-    ratingsList: [5, 5, 4, 5, 5],
-    comments: [
-      { id: 'c1', user: 'David Kim', text: 'Very clear intro slides. Thanks!', date: new Date().toISOString() }
-    ]
-  },
-  {
-    id: 'note-2',
-    title: 'Core Fundamentals of Course 2',
-    subject: 'Semester 1 Course 2',
-    semester: 1,
-    unitNumber: 2,
-    description: 'Unit 2 equations, problem sets, and key theorems summaries.',
-    fileUrl: 'https://arxiv.org/pdf/2103.00020.pdf',
-    uploadedBy: { name: 'Prof. Marcus Vance', email: 'vance@university.edu', userId: 'user-default' },
-    uploadDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    tags: ['Theorems', 'Formulas'],
-    downloads: 8,
-    rating: 4.6,
-    ratingsList: [5, 4, 5, 4, 5],
-    comments: []
-  },
-  {
-    id: 'note-3',
-    title: 'Course 1 Advanced Logic and Graphs',
-    subject: 'Semester 2 Course 1',
-    semester: 2,
-    unitNumber: 3,
-    description: 'Complete syllabus guide covering graph traversals, recursively stacked parameters, and flow charts.',
-    fileUrl: 'https://arxiv.org/pdf/2103.00020.pdf',
-    uploadedBy: { name: 'Prof. Donald Knuth', email: 'knuth@university.edu', userId: 'user-default' },
-    uploadDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    tags: ['Graphs', 'Algorithms'],
-    downloads: 27,
-    rating: 4.9,
-    ratingsList: [5, 5, 5, 5, 4, 5],
-    comments: []
-  },
-  {
-    id: 'note-govt-1',
-    title: 'GATE Computer Science & IT Syllabus & Preparation Guide',
-    subject: 'GATE (Graduate Aptitude Test in Engineering)',
-    semester: 9,
-    unitNumber: 1,
-    description: 'A comprehensive study roadmap for GATE Computer Science, including subject weightage and recommended textbooks.',
-    fileUrl: 'https://arxiv.org/pdf/2103.00020.pdf',
-    uploadedBy: { name: 'Government Exam Board', email: 'board@govt.edu', userId: 'user-default' },
-    uploadDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    tags: ['GATE', 'Syllabus', 'Computer Science'],
-    downloads: 142,
-    rating: 4.9,
-    ratingsList: [5, 5, 5, 5, 4, 5, 5],
-    comments: [
-      { id: 'c-g1', user: 'Anand R.', text: 'Very useful weightage chart. Thanks!', date: new Date().toISOString() }
-    ]
-  },
-  {
-    id: 'note-govt-2',
-    title: 'TNPSC Group 1 General Studies Short Notes',
-    subject: 'TNPSC (Tamil Nadu Public Service Commission)',
-    semester: 9,
-    unitNumber: 1,
-    description: 'Quick notes covering Indian Polity and History syllabus sections for TNPSC Group 1 prelims.',
-    fileUrl: 'https://arxiv.org/pdf/2103.00020.pdf',
-    uploadedBy: { name: 'Government Exam Board', email: 'board@govt.edu', userId: 'user-default' },
-    uploadDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    tags: ['TNPSC', 'General Studies', 'Polity'],
-    downloads: 87,
-    rating: 4.7,
-    ratingsList: [5, 4, 5, 5, 4, 5],
-    comments: []
-  }
-];
 
 // Helper to interact with LocalStorage
 const getStorageItem = (key, defaultValue) => {
@@ -379,23 +282,41 @@ window.fetch = async (input, init) => {
         }
         if (method === 'POST') {
           const user = getUserFromToken(authHeader);
-          if (!user || user.role !== 'admin') {
-            return mockResponse({ message: 'Admin access required' }, 403);
+          if (!user) {
+            return mockResponse({ message: 'Sign-in required to create courses' }, 401);
           }
 
           const body = JSON.parse(init.body);
+          // Check for duplicate within same semester
+          const dup = subjects.find(s => s.semester === Number(body.semester) && s.subjectName.toLowerCase() === (body.subjectName || '').trim().toLowerCase());
+          if (dup) return mockResponse({ message: 'Course name already exists in this semester' }, 409);
+
           const newSubject = {
             id: 'sub-' + Date.now(),
             semester: Number(body.semester),
-            subjectName: body.subjectName,
-            subjectCode: body.subjectCode,
-            professorName: body.professorName || 'Department Panel'
+            subjectName: body.subjectName.trim(),
+            subjectCode: body.subjectCode || (body.subjectName.substring(0, 4).toUpperCase() + '-' + Math.floor(100 + Math.random() * 900)),
+            professorName: body.professorName || user.name || 'Department Panel'
           };
 
           subjects.push(newSubject);
           saveDb({ subjects });
           return mockResponse(newSubject, 201);
         }
+      }
+
+      // DELETE /api/subjects/:id
+      const subjectDeleteMatch = urlStr.match(/^\/api\/subjects\/([^/?]+)$/);
+      if (subjectDeleteMatch && method === 'DELETE') {
+        const user = getUserFromToken(authHeader);
+        if (!user) return mockResponse({ message: 'Sign-in required' }, 401);
+        const subId = subjectDeleteMatch[1];
+        const { subjects } = getDb();
+        const idx = subjects.findIndex(s => (s.id || s._id) === subId);
+        if (idx === -1) return mockResponse({ message: 'Subject not found' }, 404);
+        subjects.splice(idx, 1);
+        saveDb({ subjects });
+        return mockResponse({ message: 'Course module deleted' }, 200);
       }
 
       // 3. NOTES ROUTES
@@ -457,9 +378,14 @@ window.fetch = async (input, init) => {
           subjects.push(newSubject);
         }
 
+        const topicGroup = formData.get('topicGroup') || title;
+        const fileExt = formData.get('fileExt') || '';
+
         const newNote = {
-          id: 'note-' + Date.now(),
+          id: 'note-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
           title,
+          topicGroup,
+          fileExt,
           subject: cleanSubject,
           semester,
           unitNumber,
