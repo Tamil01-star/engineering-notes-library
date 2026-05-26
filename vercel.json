@@ -7,34 +7,22 @@
       "config": {
         "distDir": "dist"
       }
-    },
-    {
-      "src": "server/server.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "server/server.js"
-    },
-    {
-      "src": "/uploads/(.*)",
-      "dest": "server/server.js"
-    },
-    {
       "src": "/assets/(.*)",
-      "dest": "/assets/$1"
+      "dest": "client/dist/assets/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/$1",
+      "dest": "client/dist/$1",
       "continue": true
     },
     {
       "src": "/(.*)",
       "status": 200,
-      "dest": "/index.html"
+      "dest": "client/dist/index.html"
     }
   ]
 }
