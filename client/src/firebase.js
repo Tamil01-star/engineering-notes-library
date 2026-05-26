@@ -7,12 +7,12 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const cfg = {
-  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY            || '',
-  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN        || '',
-  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID         || '',
-  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET     || '',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID|| '',
-  appId:             import.meta.env.VITE_FIREBASE_APP_ID             || '',
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY            || 'AIzaSyCJEu4YGmDF8znqU8cmyjxh7WMfPZm48_8',
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN        || 'engineering-notes-library.firebaseapp.com',
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID         || 'engineering-notes-library',
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET     || 'engineering-notes-library.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID|| '370428895925',
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID             || '1:370428895925:web:96e0e003a35df4c5b5d4fc',
 };
 
 // True only when all required Firebase config values are present
