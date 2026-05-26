@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #312e81;
+}
+
+.notebook-ruled {
+  background-color: #fffdd0;
+  background-image: 
+    linear-gradient(#f0e6cc 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgba(239, 68, 68, 0.25) 1.5px, transparent 1.5px);
+  background-size: 100% 28px, 100% 100%;
+  background-position: 0 0, 40px 0;
+  line-height: 28px;
+  color: #2b2b2b;
+}
+
+.dark .notebook-ruled {
+  background-color: #1a1e2a;
+  background-image: 
+    linear-gradient(#283149 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.2) 1.5px, transparent 1.5px);
+  background-size: 100% 28px, 100% 100%;
+  background-position: 0 0, 40px 0;
+  line-height: 28px;
+  color: #e2e8f0;
+}
+
+.glass-panel {
+  background: rgba(30, 41, 59, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.light .glass-panel {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.glow-cursor-follow {
+  pointer-events: none;
+  background: radial-gradient(400px circle at var(--x, 0px) var(--y, 0px), rgba(99, 102, 241, 0.15), transparent 80%);
+}
+
+.book-wrapper {
+  perspective: 1000px;
+}
+
+.book {
+  position: relative;
+  width: 140px;
+  height: 200px;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+}
+
+.book:hover {
+  transform: rotateY(-30deg) translateZ(10px);
+}
+
+.book-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--book-color, #5c4033);
+  border-radius: 4px 12px 12px 4px;
+  box-shadow: inset 3px 0 10px rgba(0,0,0,0.5), 5px 5px 15px rgba(0,0,0,0.3);
+  transform-origin: left center;
+  transition: transform 0.5s ease;
+  z-index: 5;
+}
+
+.book-pages {
+  position: absolute;
+  top: 4px;
+  left: 10px;
+  width: 90%;
+  height: 96%;
+  background: #fdfbf7;
+  border-radius: 0 8px 8px 0;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+  z-index: 4;
+}
+
+.book-spine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 100%;
+  background: rgba(0,0,0,0.25);
+  border-radius: 4px 0 0 4px;
+  z-index: 6;
+}
+
+.book-open .book-cover {
+  transform: rotateY(-140deg);
+}
+
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+
+.typing-cursor {
+  border-right: 2px solid;
+  animation: blink 0.75s step-end infinite;
+}

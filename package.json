@@ -1,0 +1,15 @@
+{
+  "name": "engineering-notes-library",
+  "version": "1.0.0",
+  "description": "Engineering Notes Library - Netflix + Modern Library + Student Dashboard theme",
+  "main": "server/server.js",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix client && npm install --prefix server",
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm start --prefix server\"",
+    "start:server": "npm start --prefix server",
+    "dev:client": "npm run dev --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
