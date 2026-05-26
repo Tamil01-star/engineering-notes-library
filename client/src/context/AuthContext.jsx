@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { isFirebaseReady, firebaseAuth, firestore } from '../firebase.js';
+import { onAuthStateChanged, signOut as fbSignOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 const AuthContext = createContext();
 
@@ -8,181 +11,175 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ── Firebase Auth State Listener ─────────────────────────────────────────
+  // When Firebase is configured, this is the source of truth for auth state.
+  // It automatically restores the session on any device / browser tab.
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!token) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
+    if (!isFirebaseReady || !firebaseAuth) {
+      // Offline/localStorage mode — use the stored token to fetch profile
+      const fetchProfile = async () => {
+        if (!token) { setUser(null); setLoading(false); return; }
+        try {
+          const res = await fetch('/api/auth/profile', { headers: { Authorization: `Bearer ${token}` } });
+          if (res.ok) setUser(await res.json());
+          else logout();
+        } catch {
+          setUser(null);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProfile();
+      return;
+    }
 
-      try {
-        setLoading(true);
-        const res = await fetch('/api/auth/profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`
+    // Firebase mode: listen to auth state changes
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const snap = await getDoc(doc(firestore, 'users', firebaseUser.uid));
+          if (snap.exists()) {
+            const userData = { id: snap.id, ...snap.data() };
+            const fbToken = 'firebase-uid-' + firebaseUser.uid;
+            setUser(userData);
+            setToken(fbToken);
+            localStorage.setItem('notes_token', fbToken);
+          } else {
+            // Profile not in Firestore yet — fallback to basic Firebase info
+            const userData = {
+              id: firebaseUser.uid,
+              name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+              email: firebaseUser.email,
+              semester: '1',
+              department: 'General',
+              role: firebaseUser.email === 'admin@notes.edu' ? 'admin' : 'student',
+              favorites: [],
+              uploadCount: 0
+            };
+            setUser(userData);
+            const fbToken = 'firebase-uid-' + firebaseUser.uid;
+            setToken(fbToken);
+            localStorage.setItem('notes_token', fbToken);
           }
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data);
-        } else {
+        } catch (err) {
+          console.error('[Auth] Error fetching profile from Firestore:', err);
+          setUser(null);
           logout();
         }
-      } catch (err) {
-        console.error(err);
+      } else {
+        // User signed out from Firebase
         setUser(null);
-      } finally {
-        setLoading(false);
+        setToken(null);
+        localStorage.removeItem('notes_token');
       }
-    };
+      setLoading(false);
+    });
 
-    fetchProfile();
-  }, [token]);
+    return () => unsubscribe();
+  }, []); // Run once on mount
 
+  // ── Login ────────────────────────────────────────────────────────────────
   const login = async (email, password) => {
     setError(null);
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
-      localStorage.setItem('notes_token', data.token);
-      setToken(data.token);
-      return data.user;
-    } catch (err) {
-      setError(err.message);
-      throw err;
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.message);
+      throw new Error(data.message);
     }
+    localStorage.setItem('notes_token', data.token);
+    setToken(data.token);
+    setUser(data.user);
+    return data.user;
   };
 
+  // ── Register ─────────────────────────────────────────────────────────────
   const register = async (name, email, password, semester, department) => {
     setError(null);
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name, email, password, semester, department })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
-
-      localStorage.setItem('notes_token', data.token);
-      setToken(data.token);
-      return data.user;
-    } catch (err) {
-      setError(err.message);
-      throw err;
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, semester, department })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.message);
+      throw new Error(data.message);
     }
+    localStorage.setItem('notes_token', data.token);
+    setToken(data.token);
+    setUser(data.user);
+    return data.user;
   };
 
+  // ── Google (mock SSO button) ─────────────────────────────────────────────
   const loginWithGoogle = async (googlePayload) => {
     setError(null);
-    try {
-      const res = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(googlePayload)
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Google Auth failed');
-      }
-
-      localStorage.setItem('notes_token', data.token);
-      setToken(data.token);
-      return data.user;
-    } catch (err) {
-      setError(err.message);
-      throw err;
+    const res = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(googlePayload)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.message);
+      throw new Error(data.message);
     }
+    localStorage.setItem('notes_token', data.token);
+    setToken(data.token);
+    setUser(data.user);
+    return data.user;
   };
 
+  // ── Update Profile ───────────────────────────────────────────────────────
   const updateProfile = async (profileData) => {
     setError(null);
-    try {
-      const res = await fetch('/api/auth/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(profileData)
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to update profile');
-      }
-
-      const profileRes = await fetch('/api/auth/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (profileRes.ok) {
-        const fullProfile = await profileRes.json();
-        setUser(fullProfile);
-      }
-      return data.user;
-    } catch (err) {
-      setError(err.message);
-      throw err;
+    const res = await fetch('/api/auth/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(profileData)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.message);
+      throw new Error(data.message);
     }
+    // Refresh profile
+    const profileRes = await fetch('/api/auth/profile', { headers: { Authorization: `Bearer ${token}` } });
+    if (profileRes.ok) setUser(await profileRes.json());
+    return data.user;
   };
 
+  // ── Toggle Favourite ─────────────────────────────────────────────────────
   const toggleFavorite = async (noteId) => {
     if (!token) return false;
     try {
       const res = await fetch(`/api/notes/${noteId}/favorite`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
         const data = await res.json();
-        const profileRes = await fetch('/api/auth/profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (profileRes.ok) {
-          const fullProfile = await profileRes.json();
-          setUser(fullProfile);
-        }
+        // Refresh profile to get updated favourites list
+        const profileRes = await fetch('/api/auth/profile', { headers: { Authorization: `Bearer ${token}` } });
+        if (profileRes.ok) setUser(await profileRes.json());
         return data.favorited;
       }
-      return false;
     } catch (err) {
       console.error(err);
-      return false;
     }
+    return false;
   };
 
+  // ── Logout ───────────────────────────────────────────────────────────────
   const logout = () => {
+    if (isFirebaseReady && firebaseAuth) {
+      fbSignOut(firebaseAuth).catch(() => {});
+    }
     localStorage.removeItem('notes_token');
     setToken(null);
     setUser(null);
@@ -191,16 +188,8 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{
-      user,
-      token,
-      loading,
-      error,
-      login,
-      register,
-      loginWithGoogle,
-      updateProfile,
-      toggleFavorite,
-      logout
+      user, token, loading, error,
+      login, register, loginWithGoogle, updateProfile, toggleFavorite, logout
     }}>
       {children}
     </AuthContext.Provider>

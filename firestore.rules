@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // User profiles: only the owner can write their own profile
+    match /users/{userId} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Subjects (course modules): anyone logged in can create/delete
+    match /subjects/{subjectId} {
+      allow read:   if true;
+      allow create: if request.auth != null;
+      allow delete: if request.auth != null;
+      allow update: if request.auth != null;
+    }
+
+    // Notes: public read, authenticated write, owner-only delete
+    match /notes/{noteId} {
+      allow read:   if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null && (
+        resource.data.uploadedBy.userId == request.auth.uid ||
+        request.auth.token.email == 'admin@notes.edu'
+      );
+    }
+  }
+}

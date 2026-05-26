@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "engineering-notes-library": "file:..",
+    "firebase": "^12.13.0",
     "framer-motion": "^11.1.7",
     "lucide-react": "^0.378.0",
     "react": "^18.3.1",
