@@ -25,8 +25,8 @@ router.get('/', async (req, res) => {
 router.get('/semester/:sem', async (req, res) => {
   const sem = Number(req.params.sem);
   
-  if (isNaN(sem) || sem < 1 || sem > 8) {
-    return res.status(400).json({ message: 'Invalid semester index (1-8)' });
+  if (isNaN(sem) || sem < 1 || (sem > 8 && sem !== 9)) {
+    return res.status(400).json({ message: 'Invalid semester index (1-8, or 9 for Govt Exams)' });
   }
 
   try {

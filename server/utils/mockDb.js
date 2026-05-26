@@ -31,6 +31,29 @@ for (let sem = 1; sem <= 8; sem++) {
   }
 }
 
+const govtExamsList = [
+  { name: 'GATE (Graduate Aptitude Test in Engineering)', code: 'GATE' },
+  { name: 'TNPSC (Tamil Nadu Public Service Commission)', code: 'TNPSC' },
+  { name: 'UPSC (Union Public Service Commission)', code: 'UPSC' },
+  { name: 'SSC CGL (Staff Selection Commission)', code: 'SSC-CGL' },
+  { name: 'RRB JE (Railway Recruitment Board)', code: 'RRB-JE' },
+  { name: 'ISRO Scientist Exam', code: 'ISRO-SC' },
+  { name: 'BARC OCES/DGFS', code: 'BARC' },
+  { name: 'DRDO Scientist Entry Test', code: 'DRDO-SET' },
+  { name: 'ESE/IES (Engineering Services Exam)', code: 'ESE-IES' },
+  { name: 'PSU Recruitment Exams', code: 'PSU-EXAM' }
+];
+
+govtExamsList.forEach((exam, idx) => {
+  defaultSubjects.push({
+    id: `sub-s9-${idx + 1}`,
+    semester: 9,
+    subjectName: exam.name,
+    subjectCode: exam.code,
+    professorName: 'Government Exam Board'
+  });
+});
+
 const defaultNotes = [
   {
     id: 'note-1',

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import BookCard from '../components/BookCard';
-import { Search, GraduationCap, Clock, Award, ChevronRight, FileText } from 'lucide-react';
+import { Search, GraduationCap, Clock, Award, ChevronRight, FileText, Compass, BookOpen } from 'lucide-react';
 
 const SemesterDashboard = () => {
   const navigate = useNavigate();
@@ -131,6 +131,37 @@ const SemesterDashboard = () => {
               onClick={() => navigate(`/semester/${sem.num}`)}
             />
           ))}
+        </div>
+      </div>
+
+      <div className="space-y-4 pt-2">
+        <h2 className="font-montserrat text-lg font-bold text-white flex items-center gap-2">
+          <Compass className="h-5 w-5 text-purple-400" />
+          <span>GOVT EXAM Special Module</span>
+        </h2>
+        
+        <div 
+          onClick={() => navigate('/semester/9')}
+          className="cursor-pointer glass-panel rounded-2xl p-6 border border-purple-500/20 hover:border-purple-500/50 bg-gradient-to-r from-purple-950/20 via-indigo-950/20 to-slate-900/60 hover:scale-[1.01] transition-all flex flex-col sm:flex-row justify-between items-center gap-4 relative overflow-hidden group shadow-2xl"
+        >
+          <div className="absolute -right-16 -top-16 w-36 h-36 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition-all duration-300"></div>
+          
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="h-14 w-14 rounded-xl bg-purple-500/15 border border-purple-400/30 flex items-center justify-center text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.15)] group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
+              <BookOpen className="h-7 w-7 text-purple-400" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-poppins text-lg font-bold text-white group-hover:text-purple-300 transition-colors">GOVT EXAM</h3>
+              <p className="text-xs text-slate-400 max-w-xl leading-relaxed">
+                Access 10 dedicated blocks for national & state-level government examinations (GATE, TNPSC, UPSC, SSC CGL, RRB JE, etc.). Upload reference guide notes and preview prep papers.
+              </p>
+            </div>
+          </div>
+          
+          <button className="px-5 py-2.5 rounded-xl bg-purple-500 text-slate-950 font-bold hover:bg-purple-400 transition-colors text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(168,85,247,0.25)] flex-shrink-0">
+            <span>Access Exam Library</span>
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       </div>
 

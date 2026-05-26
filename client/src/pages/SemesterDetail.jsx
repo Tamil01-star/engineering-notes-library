@@ -78,15 +78,17 @@ const SemesterDetail = () => {
           
           <h1 className="font-montserrat text-2xl md:text-3xl font-extrabold text-white flex items-center gap-2">
             <GraduationCap className="h-8 w-8 text-purple-400" />
-            <span>Semester {semNum} Courses</span>
+            <span>{semNum === 9 ? 'GOVT EXAM Prep Library' : `Semester ${semNum} Courses`}</span>
           </h1>
           <p className="text-sm text-slate-400 font-sans">
-            Select a course module to review all uploaded summaries and lecture guides.
+            {semNum === 9 
+              ? 'Select a government exam category block (GATE, TNPSC, UPSC, etc.) to review all preparation sheets.' 
+              : 'Select a course module to review all uploaded summaries and lecture guides.'}
           </p>
         </div>
 
         <div className="rounded-full bg-slate-800/80 px-4 py-2 border border-white/5 text-xs font-mono font-semibold text-purple-300">
-          Semester {semNum} / 8
+          {semNum === 9 ? 'Special Module' : `Semester ${semNum} / 8`}
         </div>
       </div>
 

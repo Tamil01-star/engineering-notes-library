@@ -558,5 +558,75 @@
     "subjectName": "Semester 8 Course 10",
     "subjectCode": "SEM8-C10",
     "professorName": "Dr. Claude Shannon"
+  },
+  {
+    "id": "sub-s9-1",
+    "semester": 9,
+    "subjectName": "GATE (Graduate Aptitude Test in Engineering)",
+    "subjectCode": "GATE",
+    "professorName": "Government Exam Board"
+  },
+  {
+    "id": "sub-s9-2",
+    "semester": 9,
+    "subjectName": "TNPSC (Tamil Nadu Public Service Commission)",
+    "subjectCode": "TNPSC",
+    "professorName": "Government Exam Board"
+  },
+  {
+    "id": "sub-s9-3",
+    "semester": 9,
+    "subjectName": "UPSC (Union Public Service Commission)",
+    "subjectCode": "UPSC",
+    "professorName": "Government Exam Board"
+  },
+  {
+    "id": "sub-s9-4",
+    "semester": 9,
+    "subjectName": "SSC CGL (Staff Selection Commission)",
+    "subjectCode": "SSC-CGL",
+    "professorName": "Government Exam Board"
+  },
+  {
+    "id": "sub-s9-5",
+    "semester": 9,
+    "subjectName": "RRB JE (Railway Recruitment Board)",
+    "subjectCode": "RRB-JE",
+    "professorName": "Government Exam Board"
+  },
+  {
+    "id": "sub-s9-6",
+    "semester": 9,
+    "subjectName": "ISRO Scientist Exam",
+    "subjectCode": "ISRO-SC",
+    "professorName": "Government Exam Board"
+  },
+  {
+    "id": "sub-s9-7",
+    "semester": 9,
+    "subjectName": "BARC OCES/DGFS",
+    "subjectCode": "BARC",
+    "professorName": "Government Exam Board"
+  },
+  {
+    "id": "sub-s9-8",
+    "semester": 9,
+    "subjectName": "DRDO Scientist Entry Test",
+    "subjectCode": "DRDO-SET",
+    "professorName": "Government Exam Board"
+  },
+  {
+    "id": "sub-s9-9",
+    "semester": 9,
+    "subjectName": "ESE/IES (Engineering Services Exam)",
+    "subjectCode": "ESE-IES",
+    "professorName": "Government Exam Board"
+  },
+  {
+    "id": "sub-s9-10",
+    "semester": 9,
+    "subjectName": "PSU Recruitment Exams",
+    "subjectCode": "PSU-EXAM",
+    "professorName": "Government Exam Board"
   }
 ]

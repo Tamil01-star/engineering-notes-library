@@ -68,6 +68,28 @@ const Sidebar = () => {
 
           <div className="pt-4 border-t border-white/5">
             <span className={`text-xs font-bold tracking-wider text-slate-500 uppercase px-3 transition-opacity duration-300 ${collapsed ? 'opacity-0 h-0 block overflow-hidden' : 'opacity-100'}`}>
+              Special Modules
+            </span>
+            <div className="mt-2 space-y-1">
+              <NavLink
+                to="/semester/9"
+                className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all group relative ${
+                  isActive ? 'text-cyan-400 font-semibold' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Compass className="h-5 w-5 text-purple-400" />
+                <span className={`transition-opacity duration-300 ${collapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>Govt Exams</span>
+                {collapsed && (
+                  <div className="absolute left-14 hidden group-hover:block rounded bg-slate-950 px-2 py-1 text-xs text-white border border-white/10 shadow-xl whitespace-nowrap z-50">
+                    Govt Exams (GATE/TNPSC)
+                  </div>
+                )}
+              </NavLink>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-white/5">
+            <span className={`text-xs font-bold tracking-wider text-slate-500 uppercase px-3 transition-opacity duration-300 ${collapsed ? 'opacity-0 h-0 block overflow-hidden' : 'opacity-100'}`}>
               Navigation Shortcuts
             </span>
             <div className="mt-2 space-y-1">

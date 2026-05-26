@@ -298,6 +298,7 @@ const UploadPage = () => {
                 {Array.from({ length: 8 }).map((_, i) => (
                   <option key={i + 1} value={i + 1}>Semester {i + 1}</option>
                 ))}
+                <option value="9">GOVT EXAM</option>
               </select>
             </div>
 
