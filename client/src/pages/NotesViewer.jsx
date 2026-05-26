@@ -79,7 +79,8 @@ const NotesViewer = () => {
       setNote(prev => prev ? { ...prev, downloads: (prev.downloads || 0) + 1 } : null);
 
       const link = document.createElement('a');
-      link.href = note.fileUrl;
+      const resolvedFileUrl = note.fileUrl.startsWith('http') ? note.fileUrl : (import.meta.env.VITE_API_URL || '') + note.fileUrl;
+      link.href = resolvedFileUrl;
       link.setAttribute('download', note.title);
       document.body.appendChild(link);
       link.click();
@@ -313,7 +314,7 @@ const NotesViewer = () => {
                 // PDF / Image native iframe preview
                 <div className="w-full h-full min-h-[600px] relative rounded-xl overflow-hidden bg-slate-950">
                   <iframe 
-                    src={note.fileUrl} 
+                    src={note.fileUrl.startsWith('http') ? note.fileUrl : (import.meta.env.VITE_API_URL || '') + note.fileUrl} 
                     className="w-full h-[600px] border-none bg-slate-900 rounded-xl"
                     title={note.title}
                   />
