@@ -175,6 +175,7 @@ const UploadPage = () => {
 
     let successfulUploads = 0;
     let completedCount = 0;
+    let uploadError = null;
 
     const uploadPromises = validFiles.map(async (fileObj) => {
       let { file, name } = fileObj;
@@ -206,9 +207,14 @@ const UploadPage = () => {
           headers: { 'Authorization': `Bearer ${token}` },
           body: formData
         });
-        if (res.ok) successfulUploads++;
+        if (res.ok) {
+          successfulUploads++;
+        } else {
+          const errData = await res.json();
+          uploadError = errData.message || 'Upload failed';
+        }
       } catch (err) {
-        // individual file failure — continue
+        uploadError = err.message || 'Network error';
       } finally {
         completedCount++;
         setProgress(Math.round((completedCount / validFiles.length) * 90));
@@ -223,7 +229,11 @@ const UploadPage = () => {
 
     setTimeout(() => {
       setUploading(false);
-      setDone(true);
+      if (successfulUploads > 0) {
+        setDone(true);
+      } else {
+        setErrorMsg(uploadError || 'Upload failed. Please check your Firebase Storage/Firestore settings.');
+      }
     }, 400);
   };
 
