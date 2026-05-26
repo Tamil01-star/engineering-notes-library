@@ -1,5 +1,7 @@
 # Engineering Notes Library 📚🎓
 
+🚀 **Live Demo URL**: [https://grasp-thinning-trespass.ngrok-free.dev](https://grasp-thinning-trespass.ngrok-free.dev)
+
 A premium, highly creative web application combining a futuristic educational dashboard with a modern library aesthetic (**"Netflix + Modern Library + Student Dashboard"** theme) built for engineering students to organize, preview, share, and review semester study materials.
 
 ---
@@ -74,7 +76,8 @@ To share your local production server with others around the world:
    ```bash
    ngrok http 5000
    ```
-3. Copy the generated public URL (e.g., `https://xxxx.ngrok-free.dev`) and share it. 
+3. Copy the generated public URL or access your active live link:
+   👉 **[https://grasp-thinning-trespass.ngrok-free.dev](https://grasp-thinning-trespass.ngrok-free.dev)**
 *(Note: Visitors simply click the blue **"Visit Site"** warning page shown by ngrok to enter the website).*
 
 ---
