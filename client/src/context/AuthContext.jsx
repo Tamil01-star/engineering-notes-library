@@ -16,13 +16,24 @@ export const AuthProvider = ({ children }) => {
   // It automatically restores the session on any device / browser tab.
   useEffect(() => {
     if (!isFirebaseReady || !firebaseAuth) {
-      // Offline/localStorage mode — use the stored token to fetch profile
+      // Offline/localStorage mode — use the stored token to fetch profile.
+      // If a stale Firebase token exists (from a previous Firebase session),
+      // clear it immediately so the user gets a clean login screen.
+      const storedToken = localStorage.getItem('notes_token');
+      if (storedToken && storedToken.startsWith('firebase-uid-')) {
+        localStorage.removeItem('notes_token');
+        setToken(null);
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       const fetchProfile = async () => {
-        if (!token) { setUser(null); setLoading(false); return; }
+        if (!storedToken) { setUser(null); setLoading(false); return; }
         try {
-          const res = await fetch('/api/auth/profile', { headers: { Authorization: `Bearer ${token}` } });
+          const res = await fetch('/api/auth/profile', { headers: { Authorization: `Bearer ${storedToken}` } });
           if (res.ok) setUser(await res.json());
-          else logout();
+          else { localStorage.removeItem('notes_token'); setToken(null); setUser(null); }
         } catch {
           setUser(null);
         } finally {

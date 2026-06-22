@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { BookOpen, Mail, Lock, User, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 
 const LoginPage = () => {
-  const { login, register, loginWithGoogle, error } = useAuth();
+  const { login, register, loginWithGoogle, error, logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -22,6 +22,14 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const redirectPath = searchParams.get('redirect') || '/semesters';
+
+  // On mount: wipe any stale Firebase token and clear leftover error state
+  useEffect(() => {
+    const tok = localStorage.getItem('notes_token');
+    if (tok && tok.startsWith('firebase-uid-')) {
+      logout(); // clears token + error state in AuthContext
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAuthSubmit = async (e) => {
     e.preventDefault();

@@ -5,6 +5,9 @@ import {
   Upload, FileText, CheckCircle, AlertTriangle, ArrowRight, 
   BookOpen, Layers, X, Plus, Folder, File, Trash2
 } from 'lucide-react';
+import { firebaseStorage, firestore } from '../firebase';
+import { ref, uploadBytes, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const ALLOWED_EXTS = ['.pdf', '.docx', '.ppt', '.pptx', '.jpg', '.jpeg', '.png'];
 
@@ -181,7 +184,7 @@ const UploadPage = () => {
       let { file, name } = fileObj;
       const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
 
-      // Compress image notes on-the-fly (dramatically reduces size and speeds up upload)
+      // Compress image notes on-the-fly
       if (['.jpg', '.jpeg', '.png'].includes(ext)) {
         try {
           file = await compressImage(file);

@@ -1,6 +1,7 @@
 # Engineering Notes Library 📚🎓
 
-🚀 **Live Demo URL**: [https://grasp-thinning-trespass.ngrok-free.dev](https://grasp-thinning-trespass.ngrok-free.dev)
+🚀 **Live Website (Vercel)**: [https://engineering-notes-library-85mv-km7tbdj61-tamil01-stars-projects.vercel.app/](https://engineering-notes-library-85mv-km7tbdj61-tamil01-stars-projects.vercel.app/)
+🚀 **Live Demo (ngrok Tunnel)**: [https://grasp-thinning-trespass.ngrok-free.dev](https://grasp-thinning-trespass.ngrok-free.dev)
 
 A premium, highly creative web application combining a futuristic educational dashboard with a modern library aesthetic (**"Netflix + Modern Library + Student Dashboard"** theme) built for engineering students to organize, preview, share, and review semester study materials.
 
