@@ -5,7 +5,7 @@ import { BookOpen, Mail, Lock, User, AlertCircle, ArrowRight, Eye, EyeOff } from
 
 
 const LoginPage = () => {
-  const { login, register, loginWithGoogle, error, logout } = useAuth();
+  const { login, register, loginWithGoogle, error } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -23,13 +23,7 @@ const LoginPage = () => {
 
   const redirectPath = searchParams.get('redirect') || '/semesters';
 
-  // On mount: wipe any stale Firebase token and clear leftover error state
-  useEffect(() => {
-    const tok = localStorage.getItem('notes_token');
-    if (tok && tok.startsWith('firebase-uid-')) {
-      logout(); // clears token + error state in AuthContext
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   const handleAuthSubmit = async (e) => {
     e.preventDefault();

@@ -5,9 +5,6 @@ import {
   Upload, FileText, CheckCircle, AlertTriangle, ArrowRight, 
   BookOpen, Layers, X, Plus, Folder, File, Trash2
 } from 'lucide-react';
-import { firebaseStorage, firestore } from '../firebase';
-import { ref, uploadBytes, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const ALLOWED_EXTS = ['.pdf', '.docx', '.ppt', '.pptx', '.jpg', '.jpeg', '.png'];
 
@@ -235,7 +232,7 @@ const UploadPage = () => {
       if (successfulUploads > 0) {
         setDone(true);
       } else {
-        setErrorMsg(uploadError || 'Upload failed. Please check your Firebase Storage/Firestore settings.');
+        setErrorMsg(uploadError || 'Upload failed. Please try again.');
       }
     }, 400);
   };
