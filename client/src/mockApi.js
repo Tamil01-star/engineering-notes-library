@@ -259,8 +259,8 @@ window.fetch = async (input, init) => {
     }
 
     // GET /api/notes
-    if (urlStr.startsWith('/api/notes?') || urlStr === '/api/notes') {
-      const parsedUrl = new URL(urlStr, window.location.origin);
+    if (urlStr === '/api/notes') {
+      const parsedUrl = new URL(rawUrl, window.location.origin);
       const filters = {
         semester: parsedUrl.searchParams.get('semester'),
         subject:  parsedUrl.searchParams.get('subject'),
